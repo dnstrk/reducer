@@ -1,9 +1,10 @@
-import { useEffect, useReducer } from "react";
+import { useReducer } from "react";
 import "./App.css";
 import { useState } from "react";
 import React from "react";
 import { Container, Switch } from "@mui/material";
 import axios from "axios";
+import ShowButton from "./ShowButton";
 
 function reducer(state, action) {
     switch (action.type) {
@@ -28,29 +29,69 @@ async function fetchData() {
 
 function App() {
     const [state, dispatch] = useReducer(reducer, initialState);
-    const [visible, setVisible] = useState(false);
+    const [card, setCard] = useState([]);
+    const [showList, setShowList] = useState(true);
 
-    const show = () => {
-        setVisible(!visible);
-        console.log(state[0])
-    };
-
-    // const test = () => {
-    //     console.log(state)
-    // };
+    function openCard(id) {
+        console.log(id);
+    }
 
     return (
         <div className="App">
             <Container>
-                <div>
-                    <Switch size="small" onChange={show}/>
-                    {visible ? (
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    {showList ? (
                         <ul>
                             {state.map((user) => (
-                                <li key={user.id}>{user.name}</li>
+                                <li key={user.id}>
+                                    <ShowButton
+                                        listState={showList}
+                                        listVisible={setShowList}
+                                        cardInfo={card}
+                                        cardEdit={setCard}
+                                        children={user.name}
+                                        cardItem={user}
+                                    ></ShowButton>
+                                </li>
                             ))}
                         </ul>
                     ) : null}
+                    {card.length === 0 ? null : (
+                        <div
+                            style={{ display: "flex", flexDirection: "column" }}
+                        >
+                            <button
+                                style={{
+                                    display: "inline-block",
+                                    width: "100px",
+                                }}
+                                onClick={function () {
+                                    setShowList(!showList);
+                                    setCard([]);
+                                }}
+                            >
+                                home
+                            </button>
+                            <div>
+                                <b>User:</b> <br />
+                                {card.name} - {card.username}
+                            </div>
+                            <div style={{ marginTop: "5px" }}>
+                                <b>Address:</b> <br />
+                                {card.address.city} : {card.address.street} :{" "}
+                                {card.address.suite}
+                            </div>
+                            <div style={{ marginTop: "5px" }}><b>Contacts:</b> <br /> number: {card.phone} <br />email: {card.email}</div>
+                        </div>
+                    )}
+                    {/* {showCard ? <div>cardId={card.id}</div> : null} */}
                 </div>
             </Container>
         </div>

@@ -1,4 +1,11 @@
-.App {
+/* .App {
   text-align: center;
+} */
+
+ul {
+  all: unset;
 }
 
+li {
+  margin: 0;
+}
