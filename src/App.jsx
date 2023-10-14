@@ -1,101 +1,136 @@
-import { useReducer } from "react";
-import "./App.css";
-import { useState } from "react";
-import React from "react";
-import { Container, Switch } from "@mui/material";
+import React, { useReducer, useEffect } from "react";
+// import "./App.css";
+import { Container } from "@mui/material";
 import axios from "axios";
 import ShowButton from "./ShowButton";
 
+const initialState = {
+  users: [],
+  card: null,
+  showList: true,
+  loading: true,
+  error: null
+};
+
 function reducer(state, action) {
-    switch (action.type) {
-        default:
-            return state;
-    }
-    throw Error("Unknown action: " + action.type);
+  switch (action.type) {
+    case "FETCH_SUCCESS":
+      return {
+        ...state,
+        users: action.payload,
+        loading: false
+      };
+    case "FETCH_ERROR":
+      return {
+        ...state,
+        error: action.payload,
+        loading: false
+      };
+    case "SHOW_CARD":
+      return {
+        ...state,
+        card: action.payload,
+        showList: false
+      };
+    case "HIDE_CARD":
+      return {
+        ...state,
+        card: null,
+        showList: true
+      };
+    case "RESET":
+      return initialState;
+    default:
+      return state;
+  }
 }
 
-const initialState = await fetchData();
-
-async function fetchData() {
-    try {
-        const response = await axios.get(
-            "https://jsonplaceholder.typicode.com/users"
-        );
-        return response.data;
-    } catch (e) {
-        console.log(e);
-    }
+async function fetchData(dispatch) {
+  try {
+    const response = await axios.get(
+      "https://jsonplaceholder.typicode.com/users"
+    );
+    dispatch({ type: "FETCH_SUCCESS", payload: response.data });
+  } catch (error) {
+    dispatch({ type: "FETCH_ERROR", payload: error });
+  }
 }
 
 function App() {
-    const [state, dispatch] = useReducer(reducer, initialState);
-    const [card, setCard] = useState([]);
-    const [showList, setShowList] = useState(true);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-    function openCard(id) {
-        console.log(id);
-    }
+  useEffect(() => {
+    fetchData(dispatch);
+  }, []);
 
-    return (
-        <div className="App">
-            <Container>
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+  function openCard(card) {
+    dispatch({ type: "SHOW_CARD", payload: card });
+  }
+
+  function handleHomeButtonClick() {
+    dispatch({ type: "HIDE_CARD" });
+  }
+
+  return (
+    <div className="App">
+      <Container>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}
+        >
+          {state.showList ? (
+            <ul>
+              {state.users.map((user) => (
+                <li key={user.id}>
+                  <ShowButton
+                    listState={state.showList}
+                    listVisible={(visible) => {
+                      if (visible) {
+                        handleHomeButtonClick();
+                      } else {
+                        openCard(user);
+                      }
                     }}
-                >
-                    {showList ? (
-                        <ul>
-                            {state.map((user) => (
-                                <li key={user.id}>
-                                    <ShowButton
-                                        listState={showList}
-                                        listVisible={setShowList}
-                                        cardInfo={card}
-                                        cardEdit={setCard}
-                                        children={user.name}
-                                        cardItem={user}
-                                    ></ShowButton>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : null}
-                    {card.length === 0 ? null : (
-                        <div
-                            style={{ display: "flex", flexDirection: "column" }}
-                        >
-                            <button
-                                style={{
-                                    display: "inline-block",
-                                    width: "100px",
-                                }}
-                                onClick={function () {
-                                    setShowList(!showList);
-                                    setCard([]);
-                                }}
-                            >
-                                home
-                            </button>
-                            <div>
-                                <b>User:</b> <br />
-                                {card.name} - {card.username}
-                            </div>
-                            <div style={{ marginTop: "5px" }}>
-                                <b>Address:</b> <br />
-                                {card.address.city} : {card.address.street} :{" "}
-                                {card.address.suite}
-                            </div>
-                            <div style={{ marginTop: "5px" }}><b>Contacts:</b> <br /> number: {card.phone} <br />email: {card.email}</div>
-                        </div>
-                    )}
-                    {/* {showCard ? <div>cardId={card.id}</div> : null} */}
-                </div>
-            </Container>
+                    cardInfo={state.card}
+                    children={user.name}
+                    cardItem={user}
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {state.card ? (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <button
+                style={{ display: "inline-block", width: "100px" }}
+                onClick={handleHomeButtonClick}
+              >
+                home
+              </button>
+              <div>
+                <b>User:</b> <br />
+                {state.card.name} - {state.card.username}
+              </div>
+              <div style={{ marginTop: "5px" }}>
+                <b>Address:</b> <br />
+                {state.card.address.city} : {state.card.address.street} :{" "}
+                {state.card.address.suite}
+              </div>
+              <div style={{ marginTop: "5px" }}>
+                <b>Contacts:</b> <br />
+                number: {state.card.phone} <br />
+                email: {state.card.email}
+              </div>
+            </div>
+          ) : null}
         </div>
-    );
+      </Container>
+    </div>
+  );
 }
 
 export default App;

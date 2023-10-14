@@ -3,9 +3,10 @@
 } */
 
 ul {
-  all: unset;
+    all: unset;
 }
 
 li {
-  margin: 0;
+    margin: 0;
+    list-style-type: none;
 }

@@ -1,15 +1,23 @@
-import { Button } from '@mui/material'
-import React from 'react'
+import React from "react";
+import { Button } from "@mui/material";
 
-export default function ShowButton(props) {
+const ShowButton = ({
+  listState,
+  listVisible,
+  cardInfo,
+  cardEdit,
+  children,
+  cardItem
+}) => {
+  function handleButtonClick() {
+    if (listState) {
+      listVisible(false);
+    } else {
+      cardEdit(cardItem);
+    }
+  }
 
-  function paintCard() {
-    props.listVisible(!props.listState)
-    props.cardEdit(props.cardItem)
-    console.log(props.cardInfo.length)
-  }  
+  return <Button onClick={handleButtonClick}>{children}</Button>;
+};
 
-  return (
-    <Button onClick={paintCard} variant="text">{props.children}</Button>
-  )
-}
+export default ShowButton;
